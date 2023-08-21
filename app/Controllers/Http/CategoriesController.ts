@@ -3,27 +3,26 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Category from '../../Models/Category'
 import Database from '@ioc:Adonis/Lucid/Database'
 import CreateCategoryValidator from '../../Validators/CreateCategoryValidator'
+import BaseController from './BaseController'
 
-export default class CategoriesController {
+export default class CategoriesController extends BaseController {
   public async index() {
     //TODO: rota apenas para admin...
     return await Category.query().preload('user')
   }
 
-  public async findAllByUser({ auth, response }: HttpContextContract) {
-    const user = auth.use('api').user
+  public async findAllByUser({ auth }: HttpContextContract) {
+    /*const user = auth.use('api').user
     if (!user) {
       return response.badRequest({ error: 'User not valid' })
-    }
+    }*/
+    const user = this.getUser(auth)
     return await Category.query().where('user_id', user?.id)
   }
 
   public async store({ auth, request, response }: HttpContextContract) {
     await request.validate(CreateCategoryValidator)
-    const user = auth.use('api').user
-    if (!user) {
-      return response.badRequest({ error: 'User not valid' })
-    }
+    const user = this.getUser(auth)
 
     const { name } = request.only(['name'])
 
@@ -38,7 +37,7 @@ export default class CategoriesController {
       order: lastOrderNumber[0].max + 1,
       user_id: user.id,
     })
-
+    response.status(201)
     return category
   }
 }

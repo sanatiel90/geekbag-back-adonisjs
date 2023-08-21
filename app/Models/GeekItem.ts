@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import User from './User'
+import Category from './Category'
 
 export default class GeekItem extends BaseModel {
   @column({ isPrimary: true })
@@ -16,13 +17,16 @@ export default class GeekItem extends BaseModel {
   public rating: number
 
   @column()
-  public date_add: DateTime
+  public dateAdd: DateTime
 
   @column()
   public photo: string
 
   @column()
   public user_id: number
+
+  @column()
+  public categoryId: number
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
@@ -34,4 +38,7 @@ export default class GeekItem extends BaseModel {
     foreignKey: 'user_id',
   })
   public user: BelongsTo<typeof User>
+
+  @belongsTo(() => Category)
+  public category: BelongsTo<typeof Category>
 }

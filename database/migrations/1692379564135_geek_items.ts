@@ -12,6 +12,7 @@ export default class extends BaseSchema {
       table.dateTime('date_add').nullable()
       table.string('photo').nullable()
       table.integer('user_id').unsigned().references('users.id').onDelete('CASCADE')
+      table.integer('category_id').unsigned().references('categories.id')
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
     })
