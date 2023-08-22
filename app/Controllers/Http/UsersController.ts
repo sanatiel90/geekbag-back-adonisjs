@@ -25,11 +25,16 @@ export default class UsersController extends BaseController {
       const newAvatarName = `${user.email}_${avatar.clientName}`
       if (newAvatarName !== user.avatar) {
         try {
-          //esta mandando uma foto diferente, atualizar
+          //esta mandando uma foto diferente...
+          //apagar foto antiga (se existir) e atualizar a nova
+          if (user.avatar) {
+            await fs.unlink(`tmp/uploads/${user.avatar}`)
+          }
+
           await avatar.moveToDisk('./', {
             name: newAvatarName,
           })
-          console.log('ATUALIZANDO')
+
           user.avatar = newAvatarName
         } catch (error) {
           console.log(error)
