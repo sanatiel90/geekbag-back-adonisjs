@@ -12,19 +12,13 @@ export default class CategoriesController extends BaseController {
   }
 
   public async findAllByUser({ auth }: HttpContextContract) {
-    /*const user = auth.use('api').user
-    if (!user) {
-      return response.badRequest({ error: 'User not valid' })
-    }*/
     const user = this.getUser(auth)
     return await Category.query().where('user_id', user?.id)
   }
 
   public async store({ auth, request, response }: HttpContextContract) {
-    await request.validate(CreateCategoryValidator)
+    const { name } = await request.validate(CreateCategoryValidator)
     const user = this.getUser(auth)
-
-    const { name } = request.only(['name'])
 
     //pega o ultimo order que tiver neste usuario, para que a proxima category incremente em 1
     const lastOrderNumber = await Database.from('categories')

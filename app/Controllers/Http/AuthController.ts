@@ -5,8 +5,7 @@ import Category from '../../Models/Category'
 
 export default class AuthController {
   public async register({ request, response }: HttpContextContract) {
-    await request.validate(CreateUserValidator)
-    const data = request.only(['name', 'email', 'password'])
+    const data = await request.validate(CreateUserValidator)
     const user = await User.create(data)
     await Category.createMany([
       { name: 'Hqs', icon: 'comics', order: 1, user_id: user.id },

@@ -1,7 +1,11 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from '../../Models/User'
+import UpdateUserValidator from '../../Validators/UpdateUserValidator'
+import BaseController from './BaseController'
+import fs from 'fs/promises'
+import { Application } from '@adonisjs/core/build/standalone'
 
-export default class UsersController {
+export default class UsersController extends BaseController {
   public async me({ auth }: HttpContextContract) {
     //await auth.use('api').authenticate()
     return { msg: `Está logado como ${auth.use('api').user?.name}` }
@@ -10,5 +14,36 @@ export default class UsersController {
   public async index() {
     //TODO: apenas admin aqui...
     return await User.query().preload('categories')
+  }
+
+  public async update({ auth, request, response }: HttpContextContract) {
+    const { name, avatar } = await request.validate(UpdateUserValidator)
+    const userLogged = this.getUser(auth)
+    const user = await User.findOrFail(userLogged.id)
+
+    if (avatar) {
+      const newAvatarName = `${user.email}_${avatar.clientName}`
+      if (newAvatarName !== user.avatar) {
+        try {
+          //esta mandando uma foto diferente, atualizar
+          await avatar.moveToDisk('./', {
+            name: newAvatarName,
+          })
+          console.log('ATUALIZANDO')
+          user.avatar = newAvatarName
+        } catch (error) {
+          console.log(error)
+          return response.badRequest({ error: 'Error on update avatar file' })
+        }
+      }
+    }
+
+    user
+      .merge({
+        name,
+      })
+      .save()
+
+    return user
   }
 }
